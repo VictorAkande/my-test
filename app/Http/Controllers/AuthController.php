@@ -363,7 +363,7 @@ class AuthController extends Controller
             FileLogger::error(null, $request, $response['msg']);
             return ApiResponse::errorMessage( 'Error' ,400, $response);
         }
-        //Update Password
+        //Update Password.
         $updateResettoken = User::where('reset_token', $fields['token'])
             ->update(['password' => bcrypt($fields['new_password'])]);
 
