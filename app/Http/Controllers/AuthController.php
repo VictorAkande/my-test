@@ -7,16 +7,18 @@ use App\CustomHelper\HelperClasses\FileLogger;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
 
 /**
  * @OA\Info(
  *      version="1.0.0",
  *      title="Test API",
- *      description="My  interview API description",
+ *      description="My interview API description",
  *      @OA\Contact(
  *          email="akandevictor846@gmail.com",
  *          name="Victor Akande"
  *      )
+ *
  * )
  */
 class AuthController extends Controller
@@ -192,7 +194,52 @@ class AuthController extends Controller
         return ApiResponse::successMessage($response,'Success', 200);
     }
 
+    /**
+     * @OA\Post(
+     *     path="/api/dashboard",
+     *     summary="For dashboard",
+     *     description="Dashboard endpoint",
+     *     operationId="authDashboard",
+     *     tags={"Dashboard"},
+     *     security={{"sanctum":{}}},
+     *     @OA\RequestBody(
+     *         description="Dashboard",
 
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Success",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="status", type="string"),
+     *             @OA\Property(
+     *                 property="message",
+     *                 type="string",
+     *             ),
+     *      @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *             )
+     *
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Invalid credentials",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="status", type="string"),
+     *             @OA\Property(
+     *                 property="message",
+     *                 type="string",
+     *             ),
+     *      @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *             )
+     *
+     *         )
+     *     )
+     * )
+     */
     public function dashboard(Request $request){
        $user = $request->user();
         $role = $user['is_admin'] === 1 ? "Admin" : "User" ;
@@ -201,6 +248,51 @@ class AuthController extends Controller
         return ApiResponse::successMessage($role,'Success', 200);
     }
 
+    /**
+     * @OA\Post(
+     *     path="/api/logout",
+     *     summary="For logout",
+     *     description="Logout endpoint",
+     *     operationId="authLogout",
+     *     tags={"User Access"},
+     *     security={{"sanctum":{}}},
+     *     @OA\RequestBody(
+     *         description="Logout",
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Success",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="status", type="string"),
+     *             @OA\Property(
+     *                 property="message",
+     *                 type="string",
+     *             ),
+     *      @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *             )
+     *
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Invalid credentials",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="status", type="string"),
+     *             @OA\Property(
+     *                 property="message",
+     *                 type="string",
+     *             ),
+     *      @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *             )
+     *
+     *         )
+     *     )
+     * )
+     */
     public  function logout(Request $request){
         auth()->user()->tokens()->delete();
 
@@ -372,5 +464,78 @@ class AuthController extends Controller
         ];
 
         return ApiResponse::successMessage($response,'Success', 200);
+    }
+
+
+    /**
+     * @OA\Get(
+     *     path="/api/getRandomUser",
+     *     summary="For getting random user",
+     *     description="getRandomUser endpoint",
+     *     operationId="authgetRandomUser",
+     *     tags={"Dashboard"},
+     *     security={{"sanctum":{}}},
+     *     @OA\RequestBody(
+     *         description="getRandomUser",
+
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Success",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="status", type="string"),
+     *             @OA\Property(
+     *                 property="message",
+     *                 type="string",
+     *             ),
+     *      @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *             )
+     *
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Invalid credentials",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="status", type="string"),
+     *             @OA\Property(
+     *                 property="message",
+     *                 type="string",
+     *             ),
+     *      @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *             )
+     *
+     *         )
+     *     )
+     * )
+     */
+    public function getRandomUser(){
+
+        $response = Http::get('https://jsonplaceholder.typicode.com/users');
+
+        // If the response was successful  decode the JSON data and get a random user
+        if ($response->ok()) {
+            $users = $response->json();
+            $randomUser = $users[rand(0, count($users) - 1)];
+
+            $name = $randomUser['name'];
+            $email = $randomUser['email'];
+
+            $userData = [
+                'fullname' => $name,
+                'email' => $email
+            ];
+            $response = [
+                "randomUser" => $userData,
+            ];
+            return ApiResponse::successMessage($response, 'Success', 200);
+        } else {
+
+            return ApiResponse::errorMessage('Unable To Fetch User', 500, null);
+        }
     }
 }

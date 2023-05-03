@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Http;
 
 class UserController extends Controller
 {
+
     public function getRandomUser(){
         $response = Http::get('https://jsonplaceholder.typicode.com/users');
 

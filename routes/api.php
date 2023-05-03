@@ -23,7 +23,7 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/forgotPassword', [AuthController::class, 'forgotPassword']);
 Route::post('/resetPassword', [AuthController::class, 'resetPassword']);
-Route::get('/getRandomUser', [UserController::class, 'getRandomUser']);
+Route::get('/getRandomUser', [AuthController::class, 'getRandomUser']);
 
 Route::group(['middleware' => ['auth:sanctum']], function (){
     Route::post('/dashboard', [AuthController::class, 'dashboard']);
